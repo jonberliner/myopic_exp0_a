@@ -9,7 +9,7 @@ def sac(df, fcn, reducefield, groupfields=None, fcnlabel=None):
     applies it to every group in reducefield.  groupfields are the fields
     above it that, although not necessary for the analysis per se, you want
     to keep around for a nice melted, labeled dataframe to return."""
-    # TODO: finish docs above
+    # TODO: finish docs
 
     if fcnlabel is None:
         fcnlabel = fcn.__name__
@@ -28,7 +28,7 @@ def hsac(df, fcns, reducefields, fcnlabels=None, fieldsHi2Lo=True,
     hierarchical sac.  fcn to sac from the lowest grouping to the highest.
     fcns are lofunctions to apply at each level.  reducefields are grouping
     hierarching of column names (e.g. ['condition', 'subject', 'trial'])."""
-    # TODO: finish docs above
+    # TODO: finish docs
 
     if keepAll:
         out = {}
