@@ -1,22 +1,14 @@
-from jbfunctions import jbprep, jbstats, jbsac, jbgp_fit
-import pandas as pd
-import numpy as np
-from numpy.random import RandomState
-rng = RandomState()
+from jbfunctions import jbprep
 import pdb
-import cProfile
-import pstats
-from time import time
-
-from ggplot import *
 
 ## TEMPLATE FOR TIMING DEBUGGING
+# import cProfile
+# import pstats
+# from time import time
 # cProfile.run('TEST=fcn(params)', 'fcn_stats')
 # p = pstats.Stats('fcn_stats')
 # p.sort_stats('tottime')
 # p.print_stats()
-
-
 
 ################################
 #  PREPROCESSING DATA
@@ -48,17 +40,30 @@ df = jbprep.lo1number2scalar(df, LO1NUMBER2SCALARFIELDS)
 LONUMBERFIELDS = {'d2locsX', 'd2locsY', 'pxObs', 'pyObs'}
 df = jbprep.lonumbers2nparray(df, LONUMBERFIELDS)
 
+# rename columns
+OLDNEWCOLNAMES = {'xObs': 'obsX',
+                  'yObs': 'obsY',
+                  'pxObs': 'pobsX',
+                  'pyObs': 'pobsY',
+                  'LENSCALE': 'lenscale',
+                  'NOISEVAR2': 'noisevar2',
+                  'RNGSEED': 'rngseed',
+                  'SIGVAR': 'sigvar'}
+df.rename(columns=OLDNEWCOLNAMES, inplace=True)
+
 # convert any improperly converted fields
-FIELDTYPES = {'LENSCALE': 'float64',
-              'NOISEVAR2': 'float64',
-              'RNGSEED': 'float64',
-              'SIGVAR': 'float64',
+FIELDTYPES = {'lenscale': 'float64',
+              'noisevar2': 'float64',
+              'rngseed': 'float64',
+              'sigvar': 'float64',
               'condition': 'int64',
               'counterbalance': 'int64',
               'd2locsX': 'O',
               'd2locsY': 'O',
-              'pxObs': 'O',
-              'pyObs': 'O',
+              'pobsX': 'O',
+              'pobsY': 'O',
+              'obsX': 'O',
+              'obsY': 'O',
               'drillX': 'float64',
               'drillY': 'float64',
               'psamX': 'float64',
@@ -73,6 +78,7 @@ FIELDTYPES = {'LENSCALE': 'float64',
               'workerid': 'O'}
 df = jbprep.enforceFieldTypes(df, FIELDTYPES)
 
+
 # convert condition to a factor
 df.condition = df.condition.astype(str)
 
@@ -83,12 +89,13 @@ SCREENH = 784
 GROUNDLINEY = SCREENH - SCREENH*0.9
 YMIN = -3
 YMAX = 3
-df['xObs'] = df['pxObs'].apply(lambda row: jbprep.pix2mathX(row, SCREENW))
-df['yObs'] = df['pyObs'].apply(lambda row:
+df['obsX'] = df['pobsX'].apply(lambda row: jbprep.pix2mathX(row, SCREENW))
+df['obsY'] = df['pobsY'].apply(lambda row:
         jbprep.pix2mathY(row, SCREENH, GROUNDLINEY, YMIN, YMAX))
 
 # remove extra info
 # (1 drops along cols, 0 along rows)
-DROPCOLS = ['uniqueid', 'hitid', 'assignmentid', 'pdrillX', 'pdrillY', 'pxObs', 'pyObs']
+DROPCOLS = ['uniqueid', 'hitid', 'assignmentid', 'pdrillX', 'pdrillY',
+            'pobsX', 'pobsY', 'psamX', 'psamY']
 df = df.drop(DROPCOLS, 1)
 

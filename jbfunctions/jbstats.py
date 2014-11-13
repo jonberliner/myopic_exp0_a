@@ -8,7 +8,7 @@ def drill2obs(df):
     """get the average distance between drill location and sample locations
        for every trial (row) in the dataframe"""
     mu_trial =\
-        df.apply(lambda row: np.mean(np.abs(row.drillX - row.xObs)), axis=1)
+        df.apply(lambda row: np.mean(np.abs(row.drillX - row.obsX)), axis=1)
     return np.mean(mu_trial)
 
 
@@ -22,10 +22,9 @@ def drill2obs_analysis(df):
     # get each sub's experiment avg
     mu_d2obs = mutrial_d2obs.groupby('workerid').mean().reset_index()
     # flatten and label grouped df
-    # pdb.set_trace()
     mu_d2obs = mu_d2obs.rename(columns={0: 'mu_d2obs'})
     # get and merge subject conditions (lengthscales)
-    exp_lenscale = df.groupby('workerid').apply(lambda df0: df0.LENSCALE.iat[0])
+    exp_lenscale = df.groupby('workerid').apply(lambda df0: df0.lenscale.iat[0])
     exp_lenscale = pd.DataFrame(exp_lenscale).reset_index()\
                     .rename(columns={0: 'exp_lenscale'})
     mu_d2obs = mu_d2obs.merge(exp_lenscale, on='workerid')
@@ -44,7 +43,7 @@ def fit_lenscale_analysis_opt(df):
     fits = pd.DataFrame(fits)
     fits = fits.T
     fits = fits.x
-    exp_lenscales = dfw.apply(lambda df0: df0.LENSCALE.iat[0])
+    exp_lenscales = dfw.apply(lambda df0: df0.lenscale.iat[0])
     optfits = pd.concat([fits, exp_lenscales], axis=1)\
                 .rename(columns={0:'fit_lenscale',1:'actual_lenscale'})
     return optfits
@@ -88,7 +87,7 @@ def fit_lenscale_analysis(df, lenscalepool, go=0):
         # fit lenscale to best ls in lenscalepool
         lenscaleFits = dfw.apply(lambda df0: fit_lenscale(df0, lenscalepool))
         # get experiment lengethscales
-        exp_lenscales = dfw.apply(lambda df0: df0.LENSCALE.iat[0])
+        exp_lenscales = dfw.apply(lambda df0: df0.lenscale.iat[0])
         # merge fit and actual lengthscales into single df
         return pd.concat([exp_lenscales, lenscaleFits], axis=1)\
                         .rename(columns={0:'exp_lenscale', 1:'fit_lenscale'})\

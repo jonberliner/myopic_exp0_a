@@ -17,7 +17,7 @@ from ggplot import *
 # p.print_stats()
 
 # RELOAD AND REPREP DATA
-RELOAD = True
+RELOAD = False
 if RELOAD:
     execfile("loadData.py")
 
@@ -25,13 +25,30 @@ if RELOAD:
 ################################
 #  ANALYSIS
 ################################
+# combine given obs and chosen ob
+df['allObsX'] = [np.append(df.obsX.iloc[i], df.samX.iloc[i])
+                 for i in range(df.shape[0])]
+df['allObsY'] = [np.append(df.obsY.iloc[i], df.samY.iloc[i])
+                 for i in range(df.shape[0])]
+# helper that gets thei dist from field f to obsX
+d2obsX = lambda df0, f: np.abs(df0['obsX'] - df0[f])
+dfg = df.groupby(['lenscale', 'workerid', 'round'])
+
+d2obsX_mu = lambda df0, f: np.mean(d2obsX(df0, f))
+dsamX2obsX_min = lambda df0: np.min(d2obsX(df0, 'samX'))
+
+tmp = dfg.apply(dsamX2obsX_min)
+
+d_sam2obs= dfcwt.apply(lambda df0: d2obsX(df0.iloc[0], 'samX'))
+d_sam2obs_min = d_sam2obs.apply(min)
+
 mu_worker_drill2obs = jbsac.get_mu_worker(df, jbstats.drill2obs, 'mu_drill2obs')
 
 mu_dfwc = mu_worker_drill2obs.groupby('condition')
 mu_dfwc.describe()
 
 # smaller df to speed up costly lenscale analysis
-keeps = ['xObs', 'yObs', 'drillX', 'drillY', 'round', 'workerid', 'LENSCALE']
+keeps = ['obsX', 'obsY', 'drillX', 'drillY', 'round', 'workerid', 'lenscale']
 dfsmall = df[keeps]
 # # for testing
 # ids = np.unique(df.workerid)
