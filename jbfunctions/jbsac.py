@@ -17,6 +17,7 @@ def sac(df, fcn, reducefield, groupfields=None, fcnlabel=None):
     # analysis run on every row in reducefield
     reduceddf = dfg.apply(fcn)
     reduceddf = reduceddf.reset_index()  # melt
+    reduceddf.rename(columns={0: fcnlabel}, inplace=True)
     return reduceddf
 
 

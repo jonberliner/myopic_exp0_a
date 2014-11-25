@@ -8,8 +8,38 @@ def drill2obs(df):
     """get the average distance between drill location and sample locations
        for every trial (row) in the dataframe"""
     mu_trial =\
-        df.apply(lambda row: np.mean(np.abs(row.drillX - row.obsX)), axis=1)
+        df.apply(lambda row: np.mean(np.abs(row[field] - row.obsX)), axis=1)
     return np.mean(mu_trial)
+
+
+def dBetween(df, f1, f2):
+    """get the average distance between df fields 'f1' and 'f2' for
+       for every trial (row) in the dataframe"""
+    mu_trial =\
+        df.apply(lambda row: np.mean(np.abs(row[f1] - row[f2])), axis=1)
+    return np.mean(mu_trial)
+
+
+def dBetween_analysis(df, f1, f2):
+    """this is for the dfs after being loaded with jbload.(experiment name)
+    Gets the average distance between fields f1 and f2 in df for each subject.
+    Then groups subjects and finds average distance by location"""
+    # get avg dist for every trial for every sub
+    mutrial_d = df.groupby('workerid').apply(lambda df0: dBetween(df0, f1, f2))\
+                                      .reset_index()
+    # get each sub's experiment avg
+    mu_d = mutrial_d.groupby('workerid').mean().reset_index()
+    # flatten and label grouped df
+    mu_d = mu_d.rename(columns={0: 'mu_d'})
+    # get and merge subject conditions (lengthscales)
+    exp_lenscale = df.groupby('workerid').apply(lambda df0: df0.lenscale.iat[0])
+    exp_lenscale = pd.DataFrame(exp_lenscale).reset_index()\
+                    .rename(columns={0: 'exp_lenscale'})
+    mu_d = mu_d.merge(exp_lenscale, on='workerid')
+    # get condition averages
+    cond_mu_d = mu_d.groupby('exp_lenscale').mean()
+    return {'worker_mu_d': mu_d,
+            'cond_mu_d': cond_mu_d}
 
 
 def drill2obs_analysis(df):

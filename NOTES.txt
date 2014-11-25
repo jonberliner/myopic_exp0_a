@@ -1,0 +1,9 @@
+## TEMPLATE FOR TIMING DEBUGGING
+# import cProfile
+# import pstats
+# from time import time
+# cProfile.run('TEST=fcn(params)', 'fcn_stats')
+# p = pstats.Stats('fcn_stats')
+# p.sort_stats('tottime')
+# p.print_stats()
+

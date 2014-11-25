@@ -19,9 +19,18 @@ from ggplot import *
 # RELOAD AND REPREP DATA
 RELOAD = False
 if RELOAD:
-    execfile("loadData.py")
+    DB_URL = 'mysql://jsb4:PASSWORD@mydb.c4dh2hic3vxp.us-east-1.rds.amazonaws.com:3306/myexp'
+    ## LOCAL DB (used if dbs recently synced with sync_mysql_aws2local.sh)
+    # DB_URL = 'mysql://root:PASSWORD@127.0.0.1/myexp'
+    TABLE_NAME = 'myopic_exp0'
 
+    FINISHED_STATUSES = [3,4,5,7]
+    # trials that do not return true for all functions in criterion will not be used
+    CRITERION = [lambda df: 'round' in df,
+                lambda df: df['round'] > 0 and df['round'] <= 200,
+                lambda df: df['status'] in FINISHED_STATUSES]
 
+    df = jbload.myopic_exp0(DB_URL, CRITERION)
 ################################
 #  ANALYSIS
 ################################
